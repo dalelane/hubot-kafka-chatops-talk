@@ -1,0 +1,41 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-zookeeper-access
+  namespace: kafka-ns
+spec:
+  podSelector:
+    matchLabels:
+      strimzi.io/name: my-kafka-cluster-zookeeper
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 2888
+        - protocol: TCP
+          port: 3888
+      from:
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: my-kafka-cluster-zookeeper
+    - ports:
+        - protocol: TCP
+          port: 2181
+      from:
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: my-kafka-cluster-kafka
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: my-kafka-cluster-zookeeper
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: my-kafka-cluster-entity-operator
+        - podSelector:
+            matchLabels:
+              strimzi.io/kind: cluster-operator
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: my-kafka-cluster-cruise-control
+    - ports:
+        - protocol: TCP
+          port: 9404

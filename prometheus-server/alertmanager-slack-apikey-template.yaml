@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: slack-webhook
+  namespace: prometheus-ns
+type: Opaque
+stringData:
+  url: https://hooks.slack.com/services/UNIQ/UNIQ/UNIQ

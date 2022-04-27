@@ -1,0 +1,42 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: slack
+  namespace: prometheus-ns
+  labels:
+    alertmanagerConfig: my-alertmanager
+spec:
+  route:
+    receiver: slack
+    groupBy: ['job', 'alertname']
+    groupWait: 30s
+    groupInterval: 1m
+    repeatInterval: 12h
+    routes:
+    - match:
+        severity: critical
+      receiver: slack
+  receivers:
+    - name: slack
+      slackConfigs:
+      - apiURL:
+          name: slack-webhook
+          key: url
+        sendResolved: true
+        channel: '#chatops-demo-notifications'
+        username: 'Kafka alerts'
+        title: |-
+          [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if or (and (eq (len .Alerts.Firing) 1) (eq (len .Alerts.Resolved) 0)) (and (eq (len .Alerts.Firing) 0) (eq (len .Alerts.Resolved) 1)) }}{{ range .Alerts.Firing }} @ {{ .Annotations.identifier }}{{ end }}{{ range .Alerts.Resolved }} @ {{ .Annotations.identifier }}{{ end }}{{ end }}
+        text: |-
+          {{ if or (and (eq (len .Alerts.Firing) 1) (eq (len .Alerts.Resolved) 0)) (and (eq (len .Alerts.Firing) 0) (eq (len .Alerts.Resolved) 1)) }}
+          {{ range .Alerts.Firing }}{{ .Annotations.description }}{{ end }}{{ range .Alerts.Resolved }}{{ .Annotations.description }}{{ end }}
+          {{ else }}
+          {{ if gt (len .Alerts.Firing) 0 }}
+          *Alerts Firing:*
+          {{ range .Alerts.Firing }}- {{ .Annotations.identifier }}: {{ .Annotations.description }}
+          {{ end }}{{ end }}
+          {{ if gt (len .Alerts.Resolved) 0 }}
+          *Alerts Resolved:*
+          {{ range .Alerts.Resolved }}- {{ .Annotations.identifier }}: {{ .Annotations.description }}
+          {{ end }}{{ end }}
+          {{ end }}

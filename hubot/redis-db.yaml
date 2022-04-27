@@ -1,0 +1,9 @@
+apiVersion: app.redislabs.com/v1alpha1
+kind: RedisEnterpriseDatabase
+metadata:
+  name: redis-database
+  namespace: hubot-ns
+spec:
+  redisEnterpriseCluster:
+    name: redis-cluster
+  persistence: aofEverySecond

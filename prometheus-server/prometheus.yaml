@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus
+  labels:
+    app: strimzi
+  namespace: prometheus-ns
+spec:
+  replicas: 1
+  serviceAccountName: prometheus-serviceaccount
+  podMonitorSelector:
+    matchLabels:
+      app: strimzi
+  serviceMonitorSelector: {}
+  resources:
+    requests:
+      memory: 400Mi
+  enableAdminAPI: false
+  ruleSelector:
+    matchLabels:
+      role: alert-rules
+      app: strimzi
+  alerting:
+    alertmanagers:
+    - namespace: prometheus-ns
+      name: alertmanager-operated
+      port: web
+  additionalScrapeConfigs:
+    name: prometheus-additional-scrape-configs
+    key: prometheus-additional.yaml

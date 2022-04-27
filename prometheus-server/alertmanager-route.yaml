@@ -1,0 +1,12 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: alertmanager
+  namespace: prometheus-ns
+spec:
+  to:
+    kind: Service
+    name: alertmanager-operated
+    weight: 100
+  port:
+    targetPort: web

@@ -1,0 +1,8 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: kafka-ns
+  namespace: kafka-ns
+spec:
+  targetNamespaces:
+    - kafka-ns

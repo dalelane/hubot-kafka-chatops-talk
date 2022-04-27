@@ -1,0 +1,19 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-kafka-message-traffic
+  namespace: kafka-ns
+spec:
+  podSelector:
+    matchLabels:
+      strimzi.io/name: my-kafka-cluster-kafka
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 9092
+    - ports:
+        - protocol: TCP
+          port: 9093
+    - ports:
+        - protocol: TCP
+          port: 9404

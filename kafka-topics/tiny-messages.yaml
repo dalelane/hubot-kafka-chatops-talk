@@ -1,0 +1,13 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  labels:
+    strimzi.io/cluster: my-kafka-cluster
+  name: tiny.messages
+  namespace: kafka-ns
+spec:
+  config:
+    min.insync.replicas: '1'
+  partitions: 1
+  replicas: 2
+  topicName: TINY.MESSAGES

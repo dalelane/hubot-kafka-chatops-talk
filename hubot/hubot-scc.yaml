@@ -1,0 +1,27 @@
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: hubot-scc
+  namespace: hubot-ns
+requiredDropCapabilities:
+- KILL
+- MKNOD
+- SYS_CHROOT
+- SETUID
+- SETGID
+runAsUser:
+  type: MustRunAs
+  uid: 501
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+fsGroup:
+  type: MustRunAs
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- projected
+- secret

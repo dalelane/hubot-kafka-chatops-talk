@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hubot
+  namespace: hubot-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hubot
+      app.kubernetes.io/instance: chatops-demo-bot
+  template:
+    metadata:
+      annotations:
+      labels:
+        app.kubernetes.io/name: hubot
+        app.kubernetes.io/instance: chatops-demo-bot
+    spec:
+      serviceAccountName: hubot-sa
+      initContainers:
+        - name: wait-for-redis
+          image: busybox
+          env:
+          - name: HUBOT_REDIS_HOST
+            valueFrom:
+              secretKeyRef:
+                name: redis-db-connection-details
+                key: host
+          - name: HUBOT_REDIS_PORT
+            valueFrom:
+              secretKeyRef:
+                name: redis-db-connection-details
+                key: port
+          command: [ "/bin/sh", "-c", "until nc -zv $HUBOT_REDIS_HOST $HUBOT_REDIS_PORT -w1; do echo 'waiting for redis'; sleep 1; done" ]
+      containers:
+        - name: hubot
+          image: "dalelane/hubot:70"
+          securityContext:
+            runAsUser: 501
+          tty: true
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /hubot/version
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /hubot/version
+              port: http
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: redis-db-connection-details
+                  key: url
+            - name: HUBOT_SLACK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-token
+                  key: token
+            - name: EXTRA_PACKAGES
+              value: "hubot-auth,hubot-healthz,hubot-grafana,hubot-pager-me,hubot-kafka-chatops-demo"
+
+            # hubot-grafana
+            - name: HUBOT_GRAFANA_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-connection-details
+                  key: url
+            - name: HUBOT_GRAFANA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-connection-details
+                  key: apikey
+            - name: HUBOT_GRAFANA_QUERY_TIME_RANGE
+              value: 1h
+            - name: HUBOT_GRAFANA_ORG_ID
+              value: "1"
+            - name: HUBOT_GRAFANA_DEFAULT_WIDTH
+              value: "1000"
+            - name: HUBOT_GRAFANA_DEFAULT_HEIGHT
+              value: "500"
+
+            # hubot-kafka-chatops-demo
+            - name: HUBOT_KAFKA_K8S_NAMESPACE
+              value: kafka-ns
+            - name: HUBOT_KAFKA_OPENSHIFT_CONSOLE
+              valueFrom:
+                configMapKeyRef:
+                  name: openshift-console-details
+                  key: url
+            - name: HUBOT_KAFKA_CLUSTER_NAME
+              value: my-kafka-cluster
+            - name: HUBOT_KAFKA_BOOTSTRAP
+              value: my-kafka-cluster-kafka-bootstrap.kafka-ns.svc:9093
+
+            # hubot-pager-me
+            - name: HUBOT_PAGERDUTY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pagerduty-connection-details
+                  key: apikey
+            - name: HUBOT_PAGERDUTY_ENDPOINT
+              value: ""
+            - name: HUBOT_PAGERDUTY_ROOM
+              valueFrom:
+                secretKeyRef:
+                  name: pagerduty-connection-details
+                  key: room
+            - name: HUBOT_PAGERDUTY_FROM_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pagerduty-connection-details
+                  key: email
+            - name: HUBOT_PAGERDUTY_SCHEDULES
+              valueFrom:
+                secretKeyRef:
+                  name: pagerduty-connection-details
+                  key: schedules
+
+            # hubot-auth
+            - name: HUBOT_AUTH_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-token
+                  key: adminuser

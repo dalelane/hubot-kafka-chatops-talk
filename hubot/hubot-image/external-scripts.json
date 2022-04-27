@@ -1,0 +1,9 @@
+[
+  "hubot-help",
+  "hubot-auth",
+  "hubot-redis-brain",
+  "hubot-healthz",
+  "hubot-grafana",
+  "hubot-pager-me",
+  "hubot-kafka-chatops-demo"
+]

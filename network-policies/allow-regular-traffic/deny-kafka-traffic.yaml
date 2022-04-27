@@ -1,0 +1,10 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: deny-kafka-traffic
+  namespace: kafka-ns
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kafka
+  ingress: []

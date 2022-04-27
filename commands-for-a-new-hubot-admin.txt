@@ -1,0 +1,2 @@
+@hubot I have viewer role
+@hubot I have manager role

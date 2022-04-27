@@ -1,0 +1,8 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: hubot-ns
+  namespace: hubot-ns
+spec:
+  targetNamespaces:
+    - hubot-ns
